@@ -1,2 +1,2 @@
 # stat6306introdatascience
-second try
+A Repository in Github is a space for storing and sharing data.
