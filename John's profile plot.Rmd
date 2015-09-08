@@ -1,0 +1,22 @@
+---
+title: "John's Profile"
+author: "John Weng"
+date: "September 3, 2015"
+output: html_document
+keep_md: true  
+
+---
+
+Computer programming: 4
+Math: 3
+Statistics: 5
+machine learning:2
+domain expertise:2
+communication and presentation skills: 3
+Data visualization:4
+
+```{r}
+x <- c(4,3,5,2,2,3,4)
+skills <- c("CP","math","statistics","ML","DE","CPS","DV")
+barplot(x , names.arg=skills, beside = T, legend.text = T, xlab = "types", ylab = "rating", density=seq(1,5), col = "#0066FFFF")
+```
