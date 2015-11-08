@@ -1,0 +1,183 @@
+---
+title: "DSS Project 2"
+author: "John Weng"
+date: "November 6, 2015"
+output: 
+  html_document:
+    keep_md: true
+---
+
+The purpose of this case study is to explore the basic skill of 'data sciencentist', through online job postings for under the search term. The assumption is that we can use the job tags that employers post for data scientists to define what a data scientist does (and thereby arrive at most requested skills of data science as a discipline).
+
+Below are the required R packages needed:
+
+```{r echo=FALSE}
+library("RCurl")
+library("XML")
+library("plyr")
+library("wordcloud")
+```
+
+To begin, we want to get a better idea of the search we are conducting at cybercoder.com. First, txt1 will obtain the webpage code for first search result page. From there we will want to see how many postings, pages, and the URLs for each job sites.
+```{r}
+txt1 = getForm("http://www.cybercoders.com/search/", searchterms = "Data Scientist",
+              searchlocation = "",  newsearch = "true", sorttype = "")
+```
+'doc1' is then set to orgniaze the webcode from txt1. 'links' will return the URL links for the the job sites on the first page. Because the maxium  number of job posting per page is twenty, there twenty sites' url in link. 
+```{r}
+doc1 = htmlParse(txt1, asText = TRUE)
+links = getNodeSet(doc1, "//div[@class = 'job-title']/a/@href")
+```
+
+As of the set time below, there are 'job.n' number of search results for "Data scientist"
+```{r}
+# number of  jobs postings
+Sys.time()
+jobs.n <- as.integer(xpathApply(doc1, "//div[@data-totalresults]", xmlGetAttr, "data-totalresults"))
+jobs.n
+```
+'page.n' returns the number of pages used to list all the jobs.
+```{r}
+page.n <- as.integer(xpathApply(doc1, "//div[@data-maxpages]", xmlGetAttr, "data-maxpages"))
+page.n
+```
+
+To get to all the job information, url_list is created, for do-loop purposes, to obtain page code for each of the 'page.n' search pages. The 'for' loop created each i in txt[[i]] for each of the search pages.  
+```{r}
+i<-c(1:page.n)
+url_list <- paste('http://www.cybercoders.com/search/?page=',i,sep='')
+url_list <- unlist(url_list)
+
+doc<- vector("list", page.n)
+for(i in 1:page.n){
+  txt<-getForm(url_list[i], searchterms = '"Data Scientist"',
+                    searchlocation = "",  newsearch = "true", sorttype = "")
+  doc[[i]] <- htmlParse(txt,asText = TRUE)
+}
+
+```
+
+To get each individual search for url
+```{r}
+linksk <- vector("list",page.n)
+joblinks<- vector("list",page.n)
+
+for (i in 1:page.n) {
+  linksk[[i]] <- getNodeSet(doc[[i]], "//div[@class = 'job-title']/a/@href")
+  joblinks[[i]] <- getRelativeURL(as.character(linksk[[i]]), "http://www.cybercoders.com/")
+}
+joblinks[[2]]
+```
+
+Now that the all general urls are know, the next steps gathering all the tags off of the each job sites would be much easier. Though it is possible to get the tags from each job out by each url, the process would take much computer time. Since the tags are already on the search page, all the tag would be gather straight from each page. The tags from each search page are placed in t.tag, and [[]] marking the page number. Here, t.tag[[2]], is a list of tags from page 2.
+```{r}
+
+t.tag <- vector("list", page.n)
+for (i in 1:page.n){
+  a<-getNodeSet(doc[[i]],"//span[@class='skill-name']")
+  t.tag[[i]]<- unlist(sapply(a, xmlValue))
+  }
+
+t.tag[[2]]
+```
+Next, this section combines the all the tags from different pages and assign it to atag. Because all the data is a bit large to dispaly, a count of the top 15 most freqent tags are shown below. 
+
+```{r}
+atag<-c()
+for (i in 1:page.n){
+      atag <- c(atag,t.tag[[i]])
+}
+
+at.count <- count(atag) 
+head(at.count [order(at.count[,2], decreasing = TRUE),],15)
+tab.atag <-table(atag)
+```
+
+**Visiualization**
+
+The dotchart only display the value with counts above five.
+For the world cload, the margin have been adjusted so there won't be any unploted words. Namely, ' Machine learning' often gets rejected for its' high frequency and long text. 
+```{r}
+dotchart(sort(tab.atag[(tab.atag)>=5]),main="Skills from Data Scientist Search(count>=3)",)
+wordcloud(names(tab.atag),tab.atag,scale=c(3,.2),min.freq=1)
+```
+
+
+**Previous simi-completed**
+```{r}
+```
+This last next page only to show that prior to the assignment change another project is already in the works. Some work have been lost due to some confusing with objective of the assignment. I originally did the search on the stackover 
+
+flow but the visionaliztion is pretty disaponting, since most of the gathered words are very common words
+**title 1**
+
+```{r}
+library("ggplot2")
+url2 <- "http://careers.stackoverflow.com/jobs/97977/"
+cydoc2 <- htmlParse(url2)
+```
+
+Job title
+```{r}
+las1 <- getNodeSet(cydoc2,"//a[@class = 'title job-link']")
+sapply(las1, xmlValue)
+```
+Listing the tag
+```{r}
+
+lis2 <- getNodeSet(cydoc2,"//div[@class = 'tags']//a[@class = 'post-tag job-link']")
+sapply(lis2, xmlValue)
+```
+
+```{r}
+asWords =
+  function(txt, StopWords = readLines("http://jmlr.csail.mit.edu/papers/volume5/lewis04a/a11-smart-stop-list/english.stop"), stem = FALSE){
+    words = unlist(strsplit(txt, '[[:space:]!.,;#:()/"]+'))
+    words = words[words != ""]
+    if(stem && require(Rlibstemmer))
+      words = wordStem(words)
+    i = tolower(words) %in% tolower(StopWords)
+    words[!i]
+  }
+
+
+cy.Words2 = function(u, stopWords = StopWords, doc = htmlParse(u)){
+  words = xpathApply(doc, "//div[@class='description']/ul",
+                     function(x ) asWords(xmlValue(x)))
+  words[[2]]
+}
+```
+
+getting skills from "skills & requirements"
+```{r}
+a2 <- unlist(cy.Words2(url2))
+a3 <- cy.Words2(a2)
+
+kk2 <- as.data.frame(count(a2))
+
+```
+Count of the words with more a count of 2, or the list is pretty long
+```{r}
+kk2 <-kk2[which(kk2$freq >= 2),]
+kk2
+kk2$x<- factor(kk2$x, levels = kk2$x[order(kk2$freq)])
+```
+graphic count 
+```{r}
+ggplot(kk2,aes(x=x, y=freq)) + theme_bw() + geom_bar(stat='identity')
+```
+about Gfk 4
+```{r}
+las2 <- getNodeSet(cydoc2,"//div[@class = 'description'][3]/p")
+sapply(las2, xmlValue)
+```
+location 5
+```{r}
+las3 <- getNodeSet(cydoc2,"//span[@class = 'location']")
+sapply(las3, xmlValue)
+```
+benifts 6
+```{r}
+las4 <- getNodeSet(cydoc2,"//div[@class = 'benefits-list']//span[@class = 'benefit-desciption']")
+sapply(las4, xmlValue)
+```
