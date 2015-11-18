@@ -2,13 +2,17 @@
 John Weng  
 November 6, 2015  
 
-The purpose of this case study is to explore the basic skill of 'data sciencentist', through online job postings for under the search term. The assumption is that we can use the job tags that employers post for data scientists to define what a data scientist does (and thereby arrive at most requested skills of data science as a discipline).
+The purpose of this case study is to explore the basic skill of 'data sciencentist', through online job postings under the search term. The assumption is that we can use the job tags that employers post for data scientists to define what a data scientist does. We hope to arrive data science as a discipline by the most requested skills under search term.
 
 Below are the required R packages needed:
 
 
 ```
+## Loading required package: RCurl
 ## Loading required package: bitops
+## Loading required package: XML
+## Loading required package: plyr
+## Loading required package: wordcloud
 ## Loading required package: RColorBrewer
 ```
 
@@ -33,7 +37,7 @@ Sys.time()
 ```
 
 ```
-## [1] "2015-11-08 17:32:25 CST"
+## [1] "2015-11-10 13:41:06 CST"
 ```
 
 ```r
@@ -42,7 +46,7 @@ jobs.n
 ```
 
 ```
-## [1] 146
+## [1] 148
 ```
 'page.n' returns the number of pages used to list all the jobs.
 
@@ -84,14 +88,6 @@ joblinks[[2]]
 ```
 
 ```
-##                             /data-scientist-job-233385 
-## "http://www.cybercoders.com/data-scientist-job-233385" 
-##                             /data-scientist-job-238260 
-## "http://www.cybercoders.com/data-scientist-job-238260" 
-##                             /data-scientist-job-233874 
-## "http://www.cybercoders.com/data-scientist-job-233874" 
-##                             /data-scientist-job-147098 
-## "http://www.cybercoders.com/data-scientist-job-147098" 
 ##                             /data-scientist-job-227151 
 ## "http://www.cybercoders.com/data-scientist-job-227151" 
 ##                             /data-scientist-job-227159 
@@ -114,16 +110,24 @@ joblinks[[2]]
 ## "http://www.cybercoders.com/data-scientist-job-214389" 
 ##                             /data-scientist-job-234497 
 ## "http://www.cybercoders.com/data-scientist-job-234497" 
-##                             /data-scientist-job-237186 
-## "http://www.cybercoders.com/data-scientist-job-237186" 
 ##                             /data-scientist-job-232696 
 ## "http://www.cybercoders.com/data-scientist-job-232696" 
 ##                             /data-scientist-job-208486 
 ## "http://www.cybercoders.com/data-scientist-job-208486" 
-##                             /data-scientist-job-204080 
-## "http://www.cybercoders.com/data-scientist-job-204080" 
-##                             /data-scientist-job-235839 
-## "http://www.cybercoders.com/data-scientist-job-235839"
+##                             /data-scientist-job-202521 
+## "http://www.cybercoders.com/data-scientist-job-202521" 
+##                             /data-scientist-job-233874 
+## "http://www.cybercoders.com/data-scientist-job-233874" 
+##                             /data-scientist-job-237186 
+## "http://www.cybercoders.com/data-scientist-job-237186" 
+##                             /data-scientist-job-223543 
+## "http://www.cybercoders.com/data-scientist-job-223543" 
+##                             /data-scientist-job-238260 
+## "http://www.cybercoders.com/data-scientist-job-238260" 
+##                             /data-scientist-job-142939 
+## "http://www.cybercoders.com/data-scientist-job-142939" 
+##                             /data-scientist-job-205453 
+## "http://www.cybercoders.com/data-scientist-job-205453"
 ```
 
 Now that the all general urls are know, the next steps gathering all the tags off of the each job sites would be much easier. Though it is possible to get the tags from each job out by each url, the process would take much computer time. Since the tags are already on the search page, all the tag would be gather straight from each page. The tags from each search page are placed in t.tag, and [[]] marking the page number. Here, t.tag[[2]], is a list of tags from page 2.
@@ -139,16 +143,16 @@ t.tag[[2]]
 ```
 
 ```
-##  [1] "Data Analysis"                   "Statistical Modeling"           
-##  [3] "algorithm optimization"          "R programming"                  
-##  [5] "Python"                          "Python"                         
-##  [7] "Excel"                           "SQL"                            
-##  [9] "SAS"                             "R"                              
-## [11] "Python"                          "R"                              
-## [13] "SAS"                             "Stata"                          
-## [15] "SPSS"                            "Healthcare Industry"            
-## [17] "Data Modeling"                   "knowledge engineering"          
-## [19] "UML modeling"                    "Clinical Data"                  
+##  [1] "Python"                          "Hadoop"                         
+##  [3] "Scala"                           "Linux"                          
+##  [5] "Apache Spark"                    "Python"                         
+##  [7] "Hadoop"                          "Scala"                          
+##  [9] "Linux"                           "Apache Spark"                   
+## [11] "Python"                          "Hadoop"                         
+## [13] "Scala"                           "Linux"                          
+## [15] "Apache Spark"                    "Python"                         
+## [17] "Hadoop"                          "Scala"                          
+## [19] "Linux"                           "Apache Spark"                   
 ## [21] "Python"                          "Hadoop"                         
 ## [23] "Scala"                           "Linux"                          
 ## [25] "Apache Spark"                    "Python"                         
@@ -159,34 +163,35 @@ t.tag[[2]]
 ## [35] "Apache Spark"                    "Python"                         
 ## [37] "Hadoop"                          "Scala"                          
 ## [39] "Linux"                           "Apache Spark"                   
-## [41] "Python"                          "Hadoop"                         
-## [43] "Scala"                           "Linux"                          
-## [45] "Apache Spark"                    "Python"                         
-## [47] "Hadoop"                          "Scala"                          
-## [49] "Linux"                           "Apache Spark"                   
-## [51] "Python"                          "Hadoop"                         
-## [53] "Scala"                           "Linux"                          
-## [55] "Apache Spark"                    "Python"                         
-## [57] "Hadoop"                          "Scala"                          
-## [59] "Linux"                           "Apache Spark"                   
-## [61] "Data Mining"                     "ETL Process"                    
-## [63] "Predictive Analysis"             "R"                              
-## [65] "Hadoop"                          "Machine Learning"               
-## [67] "Natural Language Processing"     "Java"                           
-## [69] "Hadoop"                          "Mahout"                         
-## [71] "Data Scientist"                  "Big Data Statistics"            
-## [73] "Geo-Spatial Analyst"             "Predictive Analystics"          
-## [75] "Consumer Segmentation Reporting" "Pharmaceutical Industry"        
-## [77] "Bioinformatics"                  "CRO Industry"                   
-## [79] "Big Data Analysis"               "R programming"                  
-## [81] "Machine Learning"                "NLP"                            
-## [83] "Data Mining"                     "Agricultural Data"              
-## [85] "Geospatial Data"                 "Deep Learning"                  
-## [87] "Python/R/Java"                   "GIS/PostGIS"                    
-## [89] "Python"                          "Statistics"                     
-## [91] "Machine Learning"                "Statistical Analysis"           
-## [93] "Data Visualization"              "Python"                         
-## [95] "Big Data"                        "Predictive Modeling"
+## [41] "Data Mining"                     "ETL Process"                    
+## [43] "Predictive Analysis"             "R"                              
+## [45] "Hadoop"                          "Machine Learning"               
+## [47] "Natural Language Processing"     "Java"                           
+## [49] "Hadoop"                          "Mahout"                         
+## [51] "Data Scientist"                  "Big Data Statistics"            
+## [53] "Geo-Spatial Analyst"             "Predictive Analystics"          
+## [55] "Consumer Segmentation Reporting" "Machine Learning"               
+## [57] "NLP"                             "Data Mining"                    
+## [59] "Agricultural Data"               "Geospatial Data"                
+## [61] "Deep Learning"                   "Python/R/Java"                  
+## [63] "GIS/PostGIS"                     "Machine Learning"               
+## [65] "Hadoop"                          "Python"                         
+## [67] "Data Mining"                     "R"                              
+## [69] "Python"                          "R"                              
+## [71] "SAS"                             "Stata"                          
+## [73] "SPSS"                            "Pharmaceutical Industry"        
+## [75] "Bioinformatics"                  "CRO Industry"                   
+## [77] "Big Data Analysis"               "R programming"                  
+## [79] "Python"                          "Excel"                          
+## [81] "SQL"                             "SAS"                            
+## [83] "R"                               "Python"                         
+## [85] "Excel"                           "SQL"                            
+## [87] "SAS"                             "R"                              
+## [89] "Applied statistics"              "Experimental Design"            
+## [91] "Hypothesis Testing"              "Predictive Analytics"           
+## [93] "Python/R/SQL"                    "Deep Learning"                  
+## [95] "Machine Learning"                "AI"                             
+## [97] "Python"                          "C++"
 ```
 Next, this section combines the all the tags from different pages and assign it to atag. Because all the data is a bit large to dispaly, a count of the top 15 most freqent tags are shown below. 
 
@@ -203,21 +208,21 @@ head(at.count [order(at.count[,2], decreasing = TRUE),],15)
 
 ```
 ##                    x freq
-## 153           Python   80
-## 109 Machine Learning   73
-## 160                R   45
-## 84            Hadoop   39
-## 51       Data Mining   34
+## 152           Python   81
+## 112 Machine Learning   71
+## 160                R   44
+## 86            Hadoop   41
+## 53       Data Mining   35
 ## 189              SQL   30
-## 175              SAS   15
-## 95              Java   13
-## 14      Apache Spark   12
-## 20          Big Data   12
-## 107            Linux   12
+## 175              SAS   17
+## 98              Java   14
+## 15      Apache Spark   12
+## 110            Linux   12
 ## 177            Scala   12
-## 119           Matlab   10
-## 54      Data Science    9
-## 198       Statistics    9
+## 21          Big Data   11
+## 121           Matlab   11
+## 199       Statistics    9
+## 56      Data Science    8
 ```
 
 ```r
@@ -257,7 +262,14 @@ flow but the visionaliztion is pretty disaponting, since most of the gathered wo
 
 
 ```r
-library("ggplot2")
+require("ggplot2")
+```
+
+```
+## Loading required package: ggplot2
+```
+
+```r
 url2 <- "http://careers.stackoverflow.com/jobs/97977/"
 cydoc2 <- htmlParse(url2)
 ```
@@ -366,7 +378,7 @@ sapply(las3, xmlValue)
 ```
 
 ```
-## [1] "\r\n                        Nuremberg, Germany\r\n                        (relocation offered)                        (visa sponsorship offered)                    "
+## list()
 ```
 benifts 6
 

@@ -7,15 +7,15 @@ output:
     keep_md: true
 ---
 
-The purpose of this case study is to explore the basic skill of 'data sciencentist', through online job postings for under the search term. The assumption is that we can use the job tags that employers post for data scientists to define what a data scientist does (and thereby arrive at most requested skills of data science as a discipline).
+The purpose of this case study is to explore the basic skill of 'data sciencentist', through online job postings under the search term. The assumption is that we can use the job tags that employers post for data scientists to define what a data scientist does. We hope to arrive data science as a discipline by the most requested skills under search term.
 
 Below are the required R packages needed:
 
 ```{r echo=FALSE}
-library("RCurl")
-library("XML")
-library("plyr")
-library("wordcloud")
+require("RCurl")
+require("XML")
+require("plyr")
+require("wordcloud")
 ```
 
 To begin, we want to get a better idea of the search we are conducting at cybercoder.com. First, txt1 will obtain the webpage code for first search result page. From there we will want to see how many postings, pages, and the URLs for each job sites.
@@ -112,7 +112,7 @@ flow but the visionaliztion is pretty disaponting, since most of the gathered wo
 **title 1**
 
 ```{r}
-library("ggplot2")
+require("ggplot2")
 url2 <- "http://careers.stackoverflow.com/jobs/97977/"
 cydoc2 <- htmlParse(url2)
 ```
