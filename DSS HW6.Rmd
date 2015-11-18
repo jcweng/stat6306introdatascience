@@ -1,0 +1,73 @@
+---
+title: "Homework 6"
+author: "John Weng"
+date: "November 18, 2015"
+output: 
+  html_document:
+    keep_md: true
+---
+
+Explore the dependence of the probability that a person has positive self-esteem on log annual income (Income2005), intelligence (AFQT), years of education (educ), and gender (data= ex1223.csv).
+
+**Organizing Data**
+In first step, I need to do some data manipulations. I created E1 as to group those with Esteem1 = 1 and Esteem1 that are not equal 1. Next. I added l.Income2005 as the logged Income2005. 
+
+```{r}
+library("Sleuth3")
+set.seed(1234)
+
+E1 <- 0
+E1[ex1223$Esteem1 != 1] = 0 
+E1[ex1223$Esteem1 == 1] = 1
+ex1223$E1 <- E1
+
+l.Income2005 <- log(ex1223$Income2005)
+ex1223$l.Income2005 <- l.Income2005 
+```
+
+Here I created the the Training and the Test data set. They are ex1223.train and  ex1223.test.
+```{r}
+dev <- sample(2, nrow(ex1223), replace=TRUE, prob=c(0.67, 0.33))
+ex1223.train <- ex1223[dev==1,]
+ex1223.test <- ex1223[dev==2,]
+```
+**Determine the Model**
+The first model.1, I have Income2005, AFQT, Educ, Gender as my predictors. Here Income2005 is not logged. By backward elimination, I have reduce to to just AFQT and Educ. The third model, model.3, does seem to best model by AIC. 
+```{r, }
+model.1 <- glm( E1 ~ Income2005+AFQT+Educ+Gender, data = ex1223.train, family="binomial")
+summary(model.1) # AIC: 2344.9
+
+model.2 <- update(model.1, ~ . - Gender) # remove model
+summary(model.2) # AIC: 2343
+
+model.3 <- update(model.2, ~ . - Income2005 ) # remove income
+summary(model.3) # AIC: 2341.6
+```
+model.4, I have l.Income2005, AFQT, Educ, Gender as my predictors. Here l.Income2005 is logged. By backward elimination, I have reduce to to just AFQT and Educ. model.5, does seem to best model by AIC, even though Gender appears to be statisticsally insignficent (p-value: 0.010045)
+```{r, }
+model.4 <- glm( E1 ~ l.Income2005+AFQT+Educ+Gender, data = ex1223.train, family="binomial")
+summary(model.4) # AIC: 2341.5
+
+model.5 <- update(model.4, ~ . - Gender) # remove Gender
+summary(model.5) # AIC: 2339.8
+
+model.6 <- update(model.5, ~ . - l.Income2005 ) # remove income
+summary(model.6) # AIC: 2341.6
+
+```
+*Are both variables needed to obtain the best classification?*
+No not all variables are need to obtain the best classification.
+*Which classifier is better?*
+l.Income2005, AFQT, and Educ
+
+**confusion table**
+Fitting the model.5 in the test data set. To Obtain  "confusion table" for my classifier. 
+```{r, }
+pred <- predict(model.5, newdata=ex1223.test,type = "response")
+pred <- round(pred)
+t = table(Esteem = ex1223.test$E1,Esteem.Pred = pred)
+catnames = levels(ex1223.train$E1)
+rownames(t) <- c("Positive","Not Positive")
+colnames(t) <- c("Positive","Not Positive")
+t
+```
